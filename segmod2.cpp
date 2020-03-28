@@ -25,6 +25,10 @@
 #include <sstream>
 #include <algorithm>
 
+#ifndef EMSCRIPTEN
+#include <sndfile.hh>
+#endif
+
 float freqToSampleLength (float freq, int sampleRate) {
   return (float) sampleRate / freq;
 }
@@ -82,10 +86,6 @@ float sawtooth(float phase, float phaseOffset) {
   return linInterp(ph, 1.0, -1.0);
 }
 
-int main(int argc, char *argv[]) {
-  printf("hello world\n");
-}
-
 float gen(std::string iFreqs, std::string seqs) {
   float * snd;
   float phaseOffset = 0.0;
@@ -115,131 +115,141 @@ float gen(std::string iFreqs, std::string seqs) {
   bool tableInput = false;
   int opt;
 
-  //while ((opt = getopt(argc, argv, "s:w:o:f:p:b:i:")) != -1) {
-  //      switch (opt) {
-  //      case 's':
-  //        sampleRate = atoi(optarg);
-  //        break;
-  //      case 'w':
-  //        if (isNumber(optarg)) {
-  //          staticWave = true;
-  //          curWave = atoi(optarg);
-  //        } else {
-  //          waveFile.open(optarg);
-  //          staticWave = false;
-  //          if (!waveFile.good()) {
-  //            fprintf(stderr, "%s could not be opened.", optarg);
-  //            exit(EXIT_FAILURE);
-  //          };
-  //        };
-  //        break;
-  //      case 'f':
-  //        freqFile.open(optarg);
-  //        if (!freqFile.good()) {
-  //          fprintf(stderr, "%s could not be opened.", optarg);
-  //          exit(EXIT_FAILURE);
-  //        };
-  //        break;
-  //      case 'i':
-  //        tableFile.open(optarg);
-  //        if (!tableFile.good()) {
-  //          fprintf(stderr, "%s could not be opened.", optarg);
-  //          exit(EXIT_FAILURE);
-  //        };
-  //        tableInput = true;
-  //        break;
-  //      case 'p':
-  //        phaseOffset = atof(optarg);
-  //        break;
-  //      case 'b':
-  //        breakpointPosition = atoi(optarg);
-  //        break;
-  //      case 'o':
-  //        outputFile = optarg;
-  //        break;
-  //      default: /* '?' */
-  //        fprintf(stderr, "Usage: %s [-s samplerate] [-w waveform file/static waveform] [-o output] [-p phase offset] [-b breakpoints per cycle (0 or 1)] [-f frequencies file] [-i index format input file]\n",
-  //      	  argv[0]);
-  //        exit(EXIT_FAILURE);
-  //      }
-  //}
+#ifndef EMSCRIPTEN
+  SndfileHandle file;
+#endif
 
-  // if (freqFile.is_open()) {
-  //   while (freqFile >> freq) {
-  //     freqs.push_back(freq);
-  //   }
-  //   freqFile.close();
-  // }
+//#ifndef EMSCRIPTEN
+//  while ((opt = getopt(argc, argv, "s:w:o:f:p:b:i:")) != -1) {
+//        switch (opt) {
+//        case 's':
+//          sampleRate = atoi(optarg);
+//          break;
+//        case 'w':
+//          if (isNumber(optarg)) {
+//            staticWave = true;
+//            curWave = atoi(optarg);
+//          } else {
+//            waveFile.open(optarg);
+//            staticWave = false;
+//            if (!waveFile.good()) {
+//              fprintf(stderr, "%s could not be opened.", optarg);
+//              exit(EXIT_FAILURE);
+//            };
+//          };
+//          break;
+//        case 'f':
+//          freqFile.open(optarg);
+//          if (!freqFile.good()) {
+//            fprintf(stderr, "%s could not be opened.", optarg);
+//            exit(EXIT_FAILURE);
+//          };
+//          break;
+//        case 'i':
+//          tableFile.open(optarg);
+//          if (!tableFile.good()) {
+//            fprintf(stderr, "%s could not be opened.", optarg);
+//            exit(EXIT_FAILURE);
+//          };
+//          tableInput = true;
+//          break;
+//        case 'p':
+//          phaseOffset = atof(optarg);
+//          break;
+//        case 'b':
+//          breakpointPosition = atoi(optarg);
+//          break;
+//        case 'o':
+//          outputFile = optarg;
+//          break;
+//        default: /* '?' */
+//          fprintf(stderr, "Usage: %s [-s samplerate] [-w waveform file/static waveform] [-o output] [-p phase offset] [-b breakpoints per cycle (0 or 1)] [-f frequencies file] [-i index format input file]\n",
+//        	  argv[0]);
+//          exit(EXIT_FAILURE);
+//        }
+//  }
+//
+//   if (freqFile.is_open()) {
+//     while (freqFile >> freq) {
+//       freqs.push_back(freq);
+//     }
+//     freqFile.close();
+//   }
+//
+//  if ((freqFile.is_open()) && (!tableInput)) {
+//    std::string line;
+//    while (getline(freqFile, line)) {
+//      int pos = line.find('#');
+//      if (pos != (int) std::string::npos) {
+//        line.erase(pos, -1);
+//      };
+//      std::istringstream iss(line);
+//      while (iss >> freq) {
+//        freqs.push_back(freq);
+//      }
+//    }
+//    freqFile.close();
+//  }
+//
+//  if (waveFile.is_open()) {
+//    std::string line;
+//    while (getline(waveFile, line)) {
+//      int pos = line.find('#');
+//      if (pos != (int) std::string::npos) {
+//        line.erase(pos, -1);
+//      };
+//      std::istringstream iss(line);
+//      while (iss >> wave) {
+//        waves.push_back(wave);
+//      }
+//    }
+//    waveFile.close();
+//  }
+//
+//  if (sampleDurFile.is_open()) {
+//    std::string line;
+//    while (getline(waveFile, line)) {
+//      int pos = line.find('#');
+//      if (pos != (int) std::string::npos) {
+//        line.erase(pos, -1);
+//      };
+//      std::istringstream iss(line);
+//      while (iss >> freq) {
+//        freqs.push_back(freq);
+//      }
+//    }
+//  }
+//
+//  
+//  if (tableFile.is_open()) {
+//    std::string line;
+//    bool first = true;
+//    while (getline(tableFile, line)) {
+//      int pos = line.find('#');
+//      if (pos != (int) std::string::npos) {
+//        line.erase(pos, -1);
+//      };
+//      if (line.size() > 0) {
+//        std::istringstream iss(line);
+//        if (first) {
+//          while (iss >> tableFreq) {
+//            freqTable.push_back(tableFreq);
+//          }
+//          first = false;
+//        } else {
+//          while (iss >> tableIndex) {
+//            freqIndices.push_back(tableIndex);
+//          }
+//        }
+//      }
+//    }
+//    waveFile.close();
+//  }
 
-  //if ((freqFile.is_open()) && (!tableInput)) {
-  //  std::string line;
-  //  while (getline(freqFile, line)) {
-  //    int pos = line.find('#');
-  //    if (pos != (int) std::string::npos) {
-  //      line.erase(pos, -1);
-  //    };
-  //    std::istringstream iss(line);
-  //    while (iss >> freq) {
-  //      freqs.push_back(freq);
-  //    }
-  //  }
-  //  freqFile.close();
-  //}
+//#endif
 
-  //if (waveFile.is_open()) {
-  //  std::string line;
-  //  while (getline(waveFile, line)) {
-  //    int pos = line.find('#');
-  //    if (pos != (int) std::string::npos) {
-  //      line.erase(pos, -1);
-  //    };
-  //    std::istringstream iss(line);
-  //    while (iss >> wave) {
-  //      waves.push_back(wave);
-  //    }
-  //  }
-  //  waveFile.close();
-  //}
 
-  //if (sampleDurFile.is_open()) {
-  //  std::string line;
-  //  while (getline(waveFile, line)) {
-  //    int pos = line.find('#');
-  //    if (pos != (int) std::string::npos) {
-  //      line.erase(pos, -1);
-  //    };
-  //    std::istringstream iss(line);
-  //    while (iss >> freq) {
-  //      freqs.push_back(freq);
-  //    }
-  //  }
-  //}
-
-  
-  //if (tableFile.is_open()) {
-  //  std::string line;
-  //  bool first = true;
-  //  while (getline(tableFile, line)) {
-  //    int pos = line.find('#');
-  //    if (pos != (int) std::string::npos) {
-  //      line.erase(pos, -1);
-  //    };
-  //    if (line.size() > 0) {
-  //      std::istringstream iss(line);
-  //      if (first) {
-  //        while (iss >> tableFreq) {
-  //          freqTable.push_back(tableFreq);
-  //        }
-  //        first = false;
-  //      } else {
-  //        while (iss >> tableIndex) {
-  //          freqIndices.push_back(tableIndex);
-  //        }
-  //      }
-  //    }
-  //  }
-  //  waveFile.close();
-  //}
+#ifdef EMSCRIPTEN
   
   std::istringstream iss(iFreqs);
   while (iss >> tableFreq) {
@@ -250,6 +260,8 @@ float gen(std::string iFreqs, std::string seqs) {
   while (isr >> tableIndex) {
     freqIndices.push_back(tableIndex);
   }
+
+#endif
   
   if (tableInput) {
     for (auto &idx : freqIndices) {
@@ -299,21 +311,30 @@ float gen(std::string iFreqs, std::string seqs) {
     
   }
 
-  //file = SndfileHandle(outputFile, SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_FLOAT, 1, sampleRate) ;
-  //  memset (snd, 0, sizeof (snd)) ;
 
-  //file.write(snd, sndLength);
+#ifndef EMSCRIPTEN
+  file = SndfileHandle(outputFile, SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_FLOAT, 1, sampleRate) ;
+
+  file.write(snd, sndLength);
+#endif
   return *snd;
+  //return 0.231234324;
 }
 
+int main(int argc, char *argv[]) {
+  printf("hello world\n");
+  gen("200 300 400 500 600 700", "1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6");
+}
+
+#ifdef EMSCRIPTEN
 
 #include <emscripten.h>
 #include <emscripten/bind.h>
 using namespace emscripten;
 
-
 EMSCRIPTEN_BINDINGS(my_module) {
    function("gen", &gen);
 }
 
+#endif
 
