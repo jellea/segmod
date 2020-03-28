@@ -20,13 +20,10 @@
 #include <fstream>
 #include <vector>
 #include <math.h>
-#include <sndfile.hh>
 #include <cstring>
 #include <unistd.h>
 #include <sstream>
 #include <algorithm>
-using namespace std;
-
 
 float freqToSampleLength (float freq, int sampleRate) {
   return (float) sampleRate / freq;
@@ -36,7 +33,7 @@ float freqToPhaseInc (float freq, int sampleRate) {
   return freq / (float) sampleRate;
 }
 
-int totalLength (vector<float> &freqs, int sampleRate) {
+int totalLength (std::vector<float> &freqs, int sampleRate) {
   float sum = 0.0;
   for (auto &f : freqs) {
     sum += freqToSampleLength(f, sampleRate);
@@ -75,7 +72,7 @@ float pulse(float phase, float phaseOffset) {
   }
 }
 
-bool isNumber(const string &s) {
+bool isNumber(const std::string &s) {
   return !s.empty() && all_of(s.begin(), s.end(), ::isdigit);
 }
     
@@ -86,24 +83,27 @@ float sawtooth(float phase, float phaseOffset) {
 }
 
 int main(int argc, char *argv[]) {
+  printf("hello world\n");
+  return 1;
+}
 
+int gen(int argc, char *argv[]) {
   float * snd;
   float phaseOffset = 0.0;
   int sampleRate = 44100;
-  ifstream freqFile;
-  ifstream waveFile;
-  ifstream sampleDurFile;
-  ifstream tableFile;
+  std::ifstream freqFile;
+  std::ifstream waveFile;
+  std::ifstream sampleDurFile;
+  std::ifstream tableFile;
   float freq;
-  vector<float> freqs;
-  vector<float> freqTable;
-  vector<int> freqIndices;
+  std::vector<float> freqs;
+  std::vector<float> freqTable;
+  std::vector<int> freqIndices;
   int tableIndex;
   float tableFreq;
   int wave;
-  string outputFile = "out.wav";
-  vector<int> waves;
-  SndfileHandle file;
+  std::string outputFile = "out.wav";
+  std::vector<int> waves;
   unsigned int sndLength;
   int breakpointPosition = 0;
   float curPhase = 0.0;
@@ -173,13 +173,13 @@ int main(int argc, char *argv[]) {
   // }
 
   if ((freqFile.is_open()) && (!tableInput)) {
-    string line;
+    std::string line;
     while (getline(freqFile, line)) {
       int pos = line.find('#');
-      if (pos != (int) string::npos) {
+      if (pos != (int) std::string::npos) {
 	line.erase(pos, -1);
       };
-      istringstream iss(line);
+      std::istringstream iss(line);
       while (iss >> freq) {
 	freqs.push_back(freq);
       }
@@ -188,13 +188,13 @@ int main(int argc, char *argv[]) {
   }
 
   if (waveFile.is_open()) {
-    string line;
+    std::string line;
     while (getline(waveFile, line)) {
       int pos = line.find('#');
-      if (pos != (int) string::npos) {
+      if (pos != (int) std::string::npos) {
 	line.erase(pos, -1);
       };
-      istringstream iss(line);
+      std::istringstream iss(line);
       while (iss >> wave) {
 	waves.push_back(wave);
       }
@@ -203,13 +203,13 @@ int main(int argc, char *argv[]) {
   }
 
   if (sampleDurFile.is_open()) {
-    string line;
+    std::string line;
     while (getline(waveFile, line)) {
       int pos = line.find('#');
-      if (pos != (int) string::npos) {
+      if (pos != (int) std::string::npos) {
 	line.erase(pos, -1);
       };
-      istringstream iss(line);
+      std::istringstream iss(line);
       while (iss >> freq) {
 	freqs.push_back(freq);
       }
@@ -218,15 +218,15 @@ int main(int argc, char *argv[]) {
 
   
   if (tableFile.is_open()) {
-    string line;
+    std::string line;
     bool first = true;
     while (getline(tableFile, line)) {
       int pos = line.find('#');
-      if (pos != (int) string::npos) {
+      if (pos != (int) std::string::npos) {
 	line.erase(pos, -1);
       };
       if (line.size() > 0) {
-	istringstream iss(line);
+        std::istringstream iss(line);
 	if (first) {
 	  while (iss >> tableFreq) {
 	    freqTable.push_back(tableFreq);
@@ -282,7 +282,7 @@ int main(int argc, char *argv[]) {
     case 4: thisSample = 0.0;
       break;
     default:
-      cout << "wrong waveform argument: " << curWave;
+      std::cout << "wrong waveform argument: " << curWave;
       break;      
     };
     snd[i] = thisSample;
@@ -290,11 +290,21 @@ int main(int argc, char *argv[]) {
     
   }
 
-  file = SndfileHandle(outputFile, SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_FLOAT, 1, sampleRate) ;
+  //file = SndfileHandle(outputFile, SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_FLOAT, 1, sampleRate) ;
   //  memset (snd, 0, sizeof (snd)) ;
 
-  file.write(snd, sndLength);
-  
+  //file.write(snd, sndLength);
+  return 1;
+}
+
+
+#include <emscripten.h>
+#include <emscripten/bind.h>
+using namespace emscripten;
+
+
+EMSCRIPTEN_BINDINGS(my_module) {
+   function("gen", &gen);
 }
 
 
