@@ -86,7 +86,7 @@ float sawtooth(float phase, float phaseOffset) {
   return linInterp(ph, 1.0, -1.0);
 }
 
-std::vector<float> gen(std::string iFreqs, std::string seqs) {
+std::vector<int> gen(std::string iFreqs, std::string seqs) {
   float * snd;
   float phaseOffset = 0.0;
   int sampleRate = 44100;
@@ -98,7 +98,7 @@ std::vector<float> gen(std::string iFreqs, std::string seqs) {
   std::vector<float> freqs;
   std::vector<float> freqTable;
   std::vector<int> freqIndices;
-  std::vector<float> sndTwo;
+  std::vector<int> sndTwo;
   int tableIndex;
   float tableFreq;
   int wave;
@@ -316,7 +316,8 @@ std::vector<float> gen(std::string iFreqs, std::string seqs) {
       break;      
     };
     snd[i] = thisSample;
-    sndTwo.push_back(thisSample);
+    int thisSampleInt  = (((int) (thisSample * 32768.5)) - 0.5);
+    sndTwo.push_back(thisSampleInt);
     curPhase += curPhaseInc;
   }
 
@@ -343,7 +344,7 @@ int main(int argc, char *argv[]) {
 using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(my_module) {
-   register_vector<float>("vector<float>");	
+   register_vector<int>("vector<int>");	
    function("gen", &gen);
 }
 

@@ -1,6 +1,36 @@
 <script src="/segmod2.out.js"></script>
+<script src="/riff-wave.js"></script>
 <script>
-Module.onRuntimeInitialized = _ => {
-  console.log(Module.gen("200 300 400 500 600 700", "1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6"));
-};
+
+	Module.onRuntimeInitialized = _ => {
+		window.read = () => {
+		   var audio = new Audio();
+		   tableData = document.getElementById("table").value
+	           vec = Module.gen("200 300 400 500 600 700", tableData);
+		   data = [];
+	           //data = new Float32Array(vec.size());
+
+		   //data.from
+		   for (var i = 0; i < vec.size(); i++) {
+		        //console.log("Vector Value: ", vec.get(i));
+			// TODO: figure out correct type over wasm->js embind
+		     data[i] = vec.get(i);
+		     //   data.set(vec.get(i);
+		   }
+		   var wave = new RIFFWAVE();
+		   wave.header.bitsPerSample = 16;
+                   wave.header.sampleRate = 44100;
+                   wave.header.numChannels = 1;
+                   wave.Make(data);
+		   console.log(wave);
+		   audio.src = wave.dataURI;
+		   audio.play();
+		}
+	};
+
 </script>
+
+<textarea id="table"></textarea>
+<br>
+
+<button onclick="read()">play</button>
