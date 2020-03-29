@@ -86,7 +86,7 @@ float sawtooth(float phase, float phaseOffset) {
   return linInterp(ph, 1.0, -1.0);
 }
 
-float gen(std::string iFreqs, std::string seqs) {
+std::vector<float> gen(std::string iFreqs, std::string seqs) {
   float * snd;
   float phaseOffset = 0.0;
   int sampleRate = 44100;
@@ -98,6 +98,7 @@ float gen(std::string iFreqs, std::string seqs) {
   std::vector<float> freqs;
   std::vector<float> freqTable;
   std::vector<int> freqIndices;
+  std::vector<float> sndTwo;
   int tableIndex;
   float tableFreq;
   int wave;
@@ -251,31 +252,39 @@ float gen(std::string iFreqs, std::string seqs) {
 
 #ifdef EMSCRIPTEN
   
-  std::istringstream iss(iFreqs);
+  std::istringstream iss(iFreqs.c_str());
   while (iss >> tableFreq) {
     freqTable.push_back(tableFreq);
   }
 
-  std::istringstream isr(seqs);
+  std::istringstream isr(seqs.c_str());
   while (isr >> tableIndex) {
     freqIndices.push_back(tableIndex);
   }
 
+  int lent = static_cast<int>(freqIndices.size());
+  printf("freqIndices.length %d\n", lent);
+
 #endif
   
-  if (tableInput) {
+  if (true) {
     for (auto &idx : freqIndices) {
       freqs.push_back(freqTable[idx-1]);
     }
   }
+  int flent = static_cast<int>(freqs.size());
+  printf("freqs.length %d\n", flent);
   
   if (breakpointPosition == 0) {
     sndLength = (totalLength(freqs, sampleRate) / 2) + 1;
   } else {
     sndLength = totalLength(freqs, sampleRate);
   }
+  
+  printf("sndLenght %d\n",sndLength);
 
   snd = new float [sndLength];
+
   curPhaseInc = freqToPhaseInc(freqs[curFreq], sampleRate);
   if (!staticWave) {
     curWave = waves[(int) curFreq % (int) waves.size()];
@@ -307,8 +316,8 @@ float gen(std::string iFreqs, std::string seqs) {
       break;      
     };
     snd[i] = thisSample;
+    sndTwo.push_back(thisSample);
     curPhase += curPhaseInc;
-    
   }
 
 
@@ -317,8 +326,9 @@ float gen(std::string iFreqs, std::string seqs) {
 
   file.write(snd, sndLength);
 #endif
-  return *snd;
-  //return 0.231234324;
+  return sndTwo;
+  //printf("snd3 %f\n", snd[3] );
+  //return snd;
 }
 
 int main(int argc, char *argv[]) {
@@ -333,6 +343,7 @@ int main(int argc, char *argv[]) {
 using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(my_module) {
+   register_vector<float>("vector<float>");	
    function("gen", &gen);
 }
 
