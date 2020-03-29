@@ -5,8 +5,9 @@
 	Module.onRuntimeInitialized = _ => {
 		window.read = () => {
 		   var audio = new Audio();
+		   tableFrews = document.getElementById("freqs").value
 		   tableData = document.getElementById("table").value
-	           vec = Module.gen("200 300 400 500 600 700", tableData);
+	           vec = Module.gen(tableFrews, tableData);
 		   data = [];
 	           //data = new Float32Array(vec.size());
 
@@ -30,6 +31,8 @@
 
 </script>
 
+<input id="freqs" value="200 300 400 500 600 700"/>
+<br>
 <textarea id="table"></textarea>
 <br>
 
